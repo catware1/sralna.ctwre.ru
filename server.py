@@ -9,6 +9,7 @@ app = Flask(__name__)
 CORS(app)
 
 ALLOWED_CHARS=list(" ёЁйцукенгшщзхъфывапролджэячсмитьбюЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮQWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890!@#$%^&*()!\"№;%:?*()-_=+}{:\"?></.,;'][")
+ALLOWED_CHARS.append("\\n")
 
 Suspic = [
     {
@@ -29,15 +30,14 @@ pre, code {
 </style>"""
 
 Scripts = {
-"BanPrompt":
+"AutoUpdate":
     """
 let xhr = new XMLHttpRequest();
-xhr.open('GET', '/is-banned');
+while(true){
+xhr.open('GET', '/getfile');
 xhr.send();
 let responseObj = xhr.response;
-let status = responseObj.message;
-if (status == "true") {
-  document.getElementById("form-1").innerHTML = "Высрать что-то не получится, науй иди, ты забанен, чел бля.";
+  document.getElementById("kek").innerHTML = responseObj.message;
 }
     """
     }
@@ -71,7 +71,6 @@ def hello_world():
         return f'''<meta charset="UTF-8">{FontsStyle}
 <title>сральня сереги</title>
 <center>
-<br><br><br><br><br><br>
     <h1>СРАЛЬНЯ ЮРЫ (СОВМЕСТНО С АРТЕМОМ) НАХУЙ</h1>
     <h3>Предупреждение - 1 пост менее чем за 15 секунд карается предупреждением. Максимальное кол-во предупреждений - 5.</h3>
     <h3>Максимальный размер текста - 1000 символов. Если он больше, то он обрежется до 1000 символов.</h3>
@@ -79,10 +78,6 @@ def hello_world():
 </head>
 <body>
 <center>
-<br>
-<br>
-<br>
-<br>
 <p id="form-1">
 <form action="upload" method="get">
       <h6>кто вы:</h6>
@@ -92,7 +87,7 @@ def hello_world():
     <br>
     <br>
     <button type="submit">Высрать</button>
-</form></p><h3>Txt файл с высерами:</h3><pre>{readff("serega.txt")}</center></body>'''
+</form></p><h3>Txt файл с высерами:</h3><pre id="kek">{readff("serega.txt")}</pre></center></body>'''
     else:
         return f'''<meta charset="UTF-8">{FontsStyle}
 <title>сральня сереги</title>
@@ -105,12 +100,8 @@ def hello_world():
 </head>
 <body>
 <center>
-<br>
-<br>
-<br>
-<br>
-<p id="form-1">
-ВЫ ЗАБАНЕНЫ НАХУЙ ПО ПРИЧИНЕ ПИДОРАС БЛЯДЬ<br><br><b>Если вы считаете, что произошла ошибка: напишите vk.com/catweird следующее письмо: <br>Здравствуй. Меня забанили на Сральне Юрия и Артемия. Прошу разбань. Мой IP - {ip}.</b></p><h3>Txt файл с высерами:</h3><pre>{readff("serega.txt")}</center></body>'''
+<p id="form-1"
+ВЫ ЗАБАНЕНЫ НАХУЙ ПО ПРИЧИНЕ ПИДОРАС БЛЯДЬ<br><br><b>Если вы считаете, что произошла ошибка: напишите vk.com/catweird следующее письмо: <br>Здравствуй. Меня забанили на Сральне Юрия и Артемия. Прошу разбань. Мой IP - {ip}.</b></p><h3>Txt файл с высерами:</h3><pre id="kek">{readff("serega.txt")}</pre></center></body>'''
 @app.route("/upload", methods=['GET'])
 def upl():
     ip_ban_list = readff("/home/sralnactwreru/Blocked_IPS.txt").split(",")
@@ -165,6 +156,10 @@ def upl():
 @app.route("/get-my-ip")
 def gmi():
     return f"<h1>{str(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))}</h1>"
+
+@app.route("/getfile")
+def gf():
+    return readff("serega.txt")
 
 @app.route("/is-banned")
 def isb():
