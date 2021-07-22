@@ -3,9 +3,12 @@
 from flask import Flask, request, abort, current_app
 from flask_cors import CORS
 from time import time
+import textwrap
 
 app = Flask(__name__)
 CORS(app)
+
+ALLOWED_CHARS=list(" ёЁйцукенгшщзхъфывапролджэячсмитьбюЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮQWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnm1234567890!@#$%^&*()!\"№;%:?*()-_=+}{:\"?></.,;'][")
 
 Suspic = [
     {
@@ -107,7 +110,7 @@ def hello_world():
 <br>
 <br>
 <p id="form-1">
-ВЫ ЗАБАНЕНЫ НАХУЙ ПО ПРИЧИНЕ ПИДОРАС БЛЯДЬ</p><h3>Txt файл с высерами:</h3><pre>{readff("serega.txt")}</center></body>'''
+ВЫ ЗАБАНЕНЫ НАХУЙ ПО ПРИЧИНЕ ПИДОРАС БЛЯДЬ<br><br><b>Если вы считаете, что произошла ошибка: напишите vk.com/catweird следующее письмо: <br>Здравствуй. Меня забанили на Сральне Юрия и Артемия. Прошу разбань. Мой IP - {ip}.</b></p><h3>Txt файл с высерами:</h3><pre>{readff("serega.txt")}</center></body>'''
 @app.route("/upload", methods=['GET'])
 def upl():
     ip_ban_list = readff("/home/sralnactwreru/Blocked_IPS.txt").split(",")
@@ -135,7 +138,22 @@ def upl():
     if ip not in ip_ban_list and "python" not in str(request.headers.get('User-Agent')).lower():
         username = str(request.args.get("username"))
         text = str(request.args.get("text")).replace("<", "&lt;").replace(">", "&gt;")[:1000]
-        pluswrite(f"------------------------------\n{username}:\n {text}\n------------------------------\n\n", "serega.txt")
+        nb = ""
+        for x in text:
+            if x in ALLOWED_CHARS:
+                nb += x
+        text = nb
+        for x in range(len(text)):
+            if text.startswith(" "):
+                text = text[1:]
+            if text.endswith(" "):
+                text = text[:-1]
+        text = textwrap.fill(text, width=25)
+        #pluswrite(f"------------------------------\n{username}:\n {text}\n------------------------------\n\n", "serega.txt")
+        pluswrite(f""" ═╣ {username} ╠══════════════════════════════
+ {text}
+ ═════════════════════════════════════════════
+""", "serega.txt")
         return f"""<head>{FontsStyle}
 <meta http-equiv="refresh" content="1;URL=http://sralnactwreru.pythonanywhere.com" />
 </head><body><h1>взлом казино 777...</h1></body>"""
