@@ -1,12 +1,48 @@
-
 # A very simple Flask Hello World app for you to get started with...
 
-from flask import Flask, request
+from flask import Flask, request, abort, current_app
 from flask_cors import CORS
-from time import ctime
+from time import time
 
 app = Flask(__name__)
 CORS(app)
+
+Suspic = [
+    {
+    "IP": "none",
+    "LastPost": time(),
+    "Trys": 0
+    }
+    ]
+Suspic_IPS = []
+
+FontsStyle="""<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500&d..');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@500&display=swap');
+* { font-family: 'Inter', sans-serif; }
+pre, code {
+	font-family: 'Roboto Mono', monospace;
+}
+</style>"""
+
+Scripts = {
+"BanPrompt":
+    """
+let xhr = new XMLHttpRequest();
+xhr.open('GET', '/is-banned');
+xhr.send();
+let responseObj = xhr.response;
+let status = responseObj.message;
+if (status == "true") {
+  document.getElementById("form-1").innerHTML = "Высрать что-то не получится, науй иди, ты забанен, чел бля.";
+}
+    """
+    }
+
+def writeto(text, target):
+    file = open(str(target), 'w', encoding='utf-8')
+    file.write(str(text))
+    file.close()
 
 def readff(file): # Read From File
     try:
@@ -22,23 +58,100 @@ def pluswrite(text, target):
     file.write(str(text))
     file.close()
 
+ip_ban_list = readff("/home/sralnactwreru/Blocked_IPS.txt").split(",")
+
 @app.route('/') # <input type="text" size="40">
 def hello_world():
-    return f'''<h1>Welcome to sralna.ctwre.ru.</h1><h3>Серверное время - {ctime()}</h3><h3>А давай ты загрузишь свой высер, А?</h3><form name="username" method="get" action="upload">
-  <p><b>Ваше имя:</b><br>
-
-   <textarea name="username" cols="40" rows="3"></textarea>
-  </p>
-  <p>Текст для щит(а)<Br>
-   <textarea name="text" cols="40" rows="3"></textarea></p>
-  <p><input type="submit" value="Отправить"></p>
- </form><h3>Txt файл с высерами:</h3><pre>{readff("sex.txt")}'''
-
+    ip_ban_list = readff("/home/sralnactwreru/Blocked_IPS.txt").split(",")
+    ip = str(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
+    if ip not in ip_ban_list:
+        return f'''<meta charset="UTF-8">{FontsStyle}
+<title>сральня сереги</title>
+<center>
+<br><br><br><br><br><br>
+    <h1>СРАЛЬНЯ ЮРЫ (СОВМЕСТНО С АРТЕМОМ) НАХУЙ</h1>
+    <h3>Предупреждение - 1 пост менее чем за 15 секунд карается предупреждением. Максимальное кол-во предупреждений - 5.</h3>
+    <h3>Максимальный размер текста - 1000 символов. Если он больше, то он обрежется до 1000 символов.</h3>
+</center>
+</head>
+<body>
+<center>
+<br>
+<br>
+<br>
+<br>
+<p id="form-1">
+<form action="upload" method="get">
+      <h6>кто вы:</h6>
+      <input type="text" name="username">
+    <h6>ваш высер:</h6>
+    <textarea name="text"></textarea>
+    <br>
+    <br>
+    <button type="submit">Высрать</button>
+</form></p><h3>Txt файл с высерами:</h3><pre>{readff("serega.txt")}</center></body>'''
+    else:
+        return f'''<meta charset="UTF-8">{FontsStyle}
+<title>сральня сереги</title>
+<center>
+<br><br><br><br><br><br>
+    <h1>СРАЛЬНЯ ЮРЫ (СОВМЕСТНО С АРТЕМОМ) НАХУЙ</h1>
+    <h3>Предупреждение - 1 пост менее чем за 15 секунд карается предупреждением. Максимальное кол-во предупреждений - 5.</h3>
+    <h3>Максимальный размер текста - 1000 символов. Если он больше, то он обрежется до 1000 символов.</h3>
+</center>
+</head>
+<body>
+<center>
+<br>
+<br>
+<br>
+<br>
+<p id="form-1">
+ВЫ ЗАБАНЕНЫ НАХУЙ ПО ПРИЧИНЕ ПИДОРАС БЛЯДЬ</p><h3>Txt файл с высерами:</h3><pre>{readff("serega.txt")}</center></body>'''
 @app.route("/upload", methods=['GET'])
 def upl():
-    username = str(request.args.get("username"))
-    text = str(request.args.get("text"))
-    pluswrite(f"Пользователь: {username}, время: {ctime()}, текст ======\n{text}\n=============================================\n\n", "sex.txt")
-    return """<head>
+    ip_ban_list = readff("/home/sralnactwreru/Blocked_IPS.txt").split(",")
+    ip = str(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
+
+    #
+    # Catware Suspicious Users Detection System
+    #
+
+    if ip not in Suspic_IPS:
+        Suspic_IPS.append(ip)
+        Suspic.append({"IP": ip, "Trys": 0, "LastPost": time()})
+
+    for x in Suspic:
+        if x["IP"] == ip:
+            if "python" in str(request.headers.get('User-Agent')):
+                x["Trys"] += 1
+            if time() - x["LastPost"] < 15:
+                x["Trys"] += 1
+                if x['Trys'] == 5:
+                    ip_ban_list.append(ip)
+                    writeto(",".join(ip_ban_list), "/home/sralnactwreru/Blocked_IPS.txt")
+                    pluswrite(f"------------------------------\nCSUDS:\n Catware Suspicious Users Detection System забанила IP: {ip}\n------------------------------\n\n", "serega.txt")
+
+    if ip not in ip_ban_list and "python" not in str(request.headers.get('User-Agent')).lower():
+        username = str(request.args.get("username"))
+        text = str(request.args.get("text")).replace("<", "&lt;").replace(">", "&gt;")[:1000]
+        pluswrite(f"------------------------------\n{username}:\n {text}\n------------------------------\n\n", "serega.txt")
+        return f"""<head>{FontsStyle}
 <meta http-equiv="refresh" content="1;URL=http://sralnactwreru.pythonanywhere.com" />
-</head><body><h1>Запись успешно загружена. Редиректинг...........!!!</h1></body>"""
+</head><body><h1>взлом казино 777...</h1></body>"""
+    else:
+        return f"""<head>{FontsStyle}
+<meta http-equiv="refresh" content="1;URL=http://sralnactwreru.pythonanywhere.com" />
+</head><body><h1>Сука иди нахуй я тебе запретил срать!!!!</h1></body>"""
+
+@app.route("/get-my-ip")
+def gmi():
+    return f"<h1>{str(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))}</h1>"
+
+@app.route("/is-banned")
+def isb():
+    ip = str(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
+    if ip not in ip_ban_list:
+        return "false"
+    else:
+        return "true"
